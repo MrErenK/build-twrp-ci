@@ -5,8 +5,7 @@ jobs:
       image: ubuntu-2204:current
     resource_class: large
     environment:
-      DEVICE_CODENAME="begonia"
-      WORKING_DIR="$CIRCLE_WORKING_DIRECTORY/$DEVICE_CODENAME"
+      DEVICE_CODENAME: begonia
 
     steps:
       - run:
@@ -23,7 +22,7 @@ jobs:
       - run:
           name: Setup ccache
           command: |
-            cd $WORKING_DIR
+            cd $CIRCLE_WORKING_DIRECTORY
             mkdir ccache
             sudo mkdir /mnt/ccache
             sudo mount --bind $CIRCLE_WORKING_DIRECTORY/ccache /mnt/ccache
@@ -54,7 +53,7 @@ jobs:
             DT_LINK="https://github.com/begonia-recovery/twrp_device_xiaomi_begonia"
             DT_BRANCH="twrp-12.1"
             DT_PATH="device/xiaomi/begonia"
-            cd $WORKING_DIR
+            cd $CIRCLE_WORKING_DIRECTORY/$DEVICE_CODENAME
             git clone --depth=1 $DT_LINK -b "$DT_BRANCH" "$DT_PATH"
 
       - run:
@@ -68,7 +67,7 @@ jobs:
       - run:
           name: Build
           command: |
-            cd $WORKING_DIR
+            cd $CIRCLE_WORKING_DIRECTORY/$DEVICE_CODENAME
             source build/envsetup.sh
             lunch twrp_$DEVICE_CODENAME-eng
             mka recoveryimage -j$(nproc --all)
@@ -76,6 +75,6 @@ jobs:
       - run:
           name: Upload
           command: |
-            cd $WORKING_DIR
+            cd $CIRCLE_WORKING_DIRECTORY/$DEVICE_CODENAME
             wget "https://raw.githubusercontent.com/As9124k82134/pdup/master/pdup" && chmod +x pdup
             ./pdup out/target/product/$DEVICE_CODENAME/recovery.img
